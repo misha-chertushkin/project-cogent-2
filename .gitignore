@@ -2,6 +2,13 @@
 __pycache__/
 *.py[codz]
 *$py.class
+*.py[cod]
+*.pyc
+*$py.class
+**/dist
+/tmp
+/out-tsc
+/bazel-out
 
 # C extensions
 *.so
@@ -20,6 +27,7 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
@@ -47,6 +55,7 @@ nosetests.xml
 coverage.xml
 *.cover
 *.py.cover
+*.py,cover
 .hypothesis/
 .pytest_cache/
 cover/
@@ -93,6 +102,8 @@ ipython_config.py
 #   having no cross-platform support, pipenv may install dependencies that don't work, or not
 #   install all needed dependencies.
 #Pipfile.lock
+Pipfile.lock
+Pipfile
 
 # UV
 #   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
@@ -138,6 +149,7 @@ celerybeat.pid
 .env
 .envrc
 .venv
+.venv*
 env/
 venv/
 ENV/
@@ -173,7 +185,7 @@ cython_debug/
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
+.idea/
 
 # Abstra
 # Abstra is an AI-powered process automation framework.
@@ -182,11 +194,16 @@ cython_debug/
 .abstra/
 
 # Visual Studio Code
-#  Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore 
+#  Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore
 #  that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
-#  and can be added to the global gitignore or merged into this file. However, if you prefer, 
+#  and can be added to the global gitignore or merged into this file. However, if you prefer,
 #  you could uncomment the following to ignore the entire vscode folder
-# .vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
 
 # Ruff stuff:
 .ruff_cache/
@@ -205,3 +222,48 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# macOS
+.DS_Store
+Thumbs.db
+
+# User-specific files
+.terraform*
+.Terraform*
+
+tmp*
+
+# Node
+**/node_modules
+npm-debug.log
+yarn-error.log
+
+# IDEs and editors
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Miscellaneous
+**/.angular/*
+/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+
+# Starter pack specific
+.persist_vector_store
+tests/load_test/.results/*.html
+tests/load_test/.results/*.csv
+.locust_env
+my_env.tfvars
+.saved_chats
+.requirements.txt
+
+# A2A Inspector
+tools/a2a-inspector/
