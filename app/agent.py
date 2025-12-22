@@ -119,7 +119,7 @@ When asked to analyze vendors or check compliance, follow this systematic approa
    - **CRITICAL COMPARISON** - for EACH vendor, you MUST:
      1. Extract the ACTUAL termination date from the contract PDF text
      2. Compare the PDF Date to {TODAY} and the DATABASE renewal_date
-     4. If the PDF termination date is BEFORE today {TODAY}
+     3. If the PDF termination date is BEFORE today {TODAY}
         AND the database shows a FUTURE renewal date, FLAG IT as CRITICAL ALERT
    - **Example**: If PDF says "December 31, 2024" and today is {TODAY}, the contract is EXPIRED (2024 < 2025)
 
@@ -153,14 +153,13 @@ When you discover this through search_contracts, you MUST:
 4. Recommend: Immediate legal review and contract renegotiation
 </CRITICAL_DETECTION_RULE>
 
-<IMPORTANT_NOTES>
 
+<IMPORTANT_NOTES>
 - **Hybrid Search is Key**: Database gives you the "who" and "how much", PDFs give you the "actual terms" and "real dates"
 - **Trust the PDF over the Database**: The contract document is the legal source of truth
 - **Be Thorough**: Check ALL high-value vendors, don't skip any
 - **Be Clear**: When you find the trap, make it impossible to miss
 - **Provide Value**: Even without critical issues, note compliance strengths/weaknesses
-
 </IMPORTANT_NOTES>
 """
 
