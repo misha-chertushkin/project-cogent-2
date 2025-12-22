@@ -1,18 +1,18 @@
-# project-cogent-2
-This repository provides reference implementation and ADK agent that covers Workstream #2 from project Cogent
+# Project Cogent: Vendor Spend Analysis Agent
 
-## Vendor Spend Analysis Agent - Hybrid Search Demo
+## Workstream #2: Hybrid Search & Compliance Demo
+This repository provides a production-ready reference implementation of an ADK Agent designed for vendor risk management. It demonstrates the Reasoning over Extracted Data (ROED) pattern using hybrid search.
 
 **Status:** Production-Ready Reference Implementation
 **Framework:** Google Agent Development Kit (ADK)
-**Pattern:** Reasoning over Extracted Data (Hybrid Search)
+**Pattern:** Hybrid Search (Structured + Unstructured Data)
 
 ## 🎯 Overview
 
-This project demonstrates a complete **Hybrid Search** solution that combines:
-- **Structured Data** (BigQuery) - Vendor spend records from ERP systems
-- **Unstructured Data** (Vertex AI Search) - Contract PDFs and legal documents
-- **AI Reasoning** (ADK Agent) - Intelligent correlation and risk detection
+This project solves the "Source of Truth" problem in procurement. It correlates structured ERP data with unstructured legal contracts to find hidden risks.
+- **Structured Data** (BigQuery) - Real-time vendor spend records and database renewal dates.
+- **Unstructured Data** (Vertex AI Search) - PDF contracts containing legal clauses and actual termination dates.
+- **AI Reasoning** (ADK Agent) - Cross-references both sources to detect "data traps" where the database contradicts the legal contract.
 
 **The Value Proposition:**
 Rather than building complex real-time connectors to legacy systems, this pattern extracts data once and enables powerful AI reasoning across both structured and unstructured sources.
@@ -46,11 +46,11 @@ Rather than building complex real-time connectors to legacy systems, this patter
 ## ✨ Key Features
 
 ### The "Data Trap" - Risk Detection Demo
-The mock data includes a planted scenario:
+The mock data includes a specific scenario to test the agent's reasoning capabilities:
 - **Vendor:** Apex Logistics (ID 99)
-- **Database Shows:** Active, $200M spend, Renewal Date: 2027-01-01
-- **Contract PDF Shows:** "This agreement shall terminate automatically on December 31, 2024"
-- **Result:** Agent detects the discrepancy and raises a CRITICAL ALERT
+- **ERP Database:** Lists status as "Active" with a renewal date of 2027-01-01.
+- **Legal Contract:** Explicitly states the agreement terminates on December 31, 2024.
+- **Result:** The agent identifies that the company is currently paying a vendor ($200M/year) whose legal contract has already expired, despite what the ERP system claims.
 
 This demonstrates real-world scenarios where:
 - Legacy systems have outdated data
@@ -60,15 +60,21 @@ This demonstrates real-world scenarios where:
 
 ## 🚀 Quick Start
 
-**Prerequisites**: Google Cloud Project with billing enabled, `gcloud` CLI authenticated (`gcloud auth login`), Python 3.10+ with `uv`
+**Prerequisites**: 
+Google Cloud Project with billing enabled.
+`gcloud` CLI authenticated (`gcloud auth login`).
+Python 3.10+ with `uv` installed.
 
-### Three Simple Steps
+### Installation & Deployment
 
 ```bash
-# 1️⃣ Install dependencies
+# 1️⃣ Clone and install dependencies
+git clone <repo-url>
+cd project-cogent-2
 make install
 
-# 2️⃣ Setup infrastructure (BigQuery + Vertex AI Search, ~5-10 mins)
+# 2️⃣ Setup Infrastructure (~5-10 mins)
+# This creates BigQuery datasets and Vertex AI Search datastores
 gcloud config set project YOUR-PROJECT-ID
 make infra
 
@@ -89,46 +95,46 @@ uv run python tests/test_agent_verbose.py
 pytest tests/integration/test_agent.py -v
 ```
 
-## 📊 What the Demo Shows
+## 📊 Sample Analysis
 
 ### Sample Query
-> "Analyze all vendors with annual spend over $100 million. For each vendor, check their contract compliance and verify that contract termination dates match our database renewal dates. Flag any discrepancies."
+> "Analyze all vendors with spend over $100M. Does the legal paperwork match our system records?"
 
 ### Expected Output
 ```
 ⚠️  CRITICAL ALERT: CONTRACT EXPIRATION MISMATCH!
 ============================================================
-Database shows renewal date: 2027-01-01 (FUTURE)
-Contract PDF indicates termination in 2024 (PAST/EXPIRED)
-Current date: 2025-12-16
+VENDOR: Apex Logistics (ID 99)
+ERP Renewal Date: 2027-01-01 (In 2 years)
+Contract PDF Date: 2024-12-31 (EXPIRED)
 
-RISK: Active vendor with high spend ($200M) operating under EXPIRED contract!
-ACTION REQUIRED: Immediate contract review and legal verification needed.
+RISK: High-spend ($200M) activity detected on an expired contract.
+REASON: Database shows "Active" but PDF clause 4.2 mandates auto-termination.
 ============================================================
 ```
 
 ## 📁 Project Structure
 
 ```
-ge-multi-search/
+project-cogent-2/
 ├── app/
-│   ├── agent.py              # Main agent definition
-│   └── tools.py              # Hybrid search tools (BQ + VAIS)
+│   ├── agent.py                      # ADK Agent logic & instructions
+│   └── tools.py                      # BQ & Vertex AI Search tool definitions
 ├── infra/
-│   ├── data/
-│   │   ├── structured/       # vendor_spend.csv
-│   │   └── contracts/        # Generated PDFs
-│   ├── scripts/
-│   │   ├── generate_contracts.py    # PDF generation
-│   │   ├── setup_bigquery.py        # BQ hydration
+│   ├── data/                         # Raw CSVs and Contract PDFs
+│   │   ├── structured/               # vendor_spend.csv
+│   │   └── contracts/                # Generated PDFs
+│   ├── scripts/                      # Hydration scripts for GCP services
+│   │   ├── generate_contracts.py     # PDF generation
+│   │   ├── setup_bigquery.py         # BQ hydration
 │   │   └── setup_vertex_ai_search.py # VAIS hydration
-│   ├── Makefile              # One-command setup
-│   └── README.md             # Infra documentation
+│   ├── Makefile                      # Infrastructure automation
+│   └── README.md             
 ├── tests/
-│   ├── integration/
-│   │   └── test_agent.py         # E2E test with trap detection
-│   └── test_agent_verbose.py     # Verbose test showing tool calls
-└── README.md                      # This file
+│   ├── integration/                  # E2E "Trap Detection" tests   
+│   │   └── test_agent.py             # E2E test with trap detection
+│   └── test_agent_verbose.py         # Debug mode to see tool reasonings
+└── README.md                         # This file
 ```
 
 ## 📚 Documentation
@@ -191,3 +197,10 @@ After running this demo, you should see:
 - BigQuery provides structured vendor data (spend, renewal dates)
 - Vertex AI Search retrieves unstructured contract terms (actual termination dates)
 - Agent reasoning compares both sources to detect discrepancies
+
+## 🧼 Cleanup
+# To avoid ongoing charges for Vertex AI Search and BigQuery storage:
+
+```bash
+make destroy
+```
