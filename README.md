@@ -89,6 +89,53 @@ uv run python tests/test_agent_verbose.py
 pytest tests/integration/test_agent.py -v
 ```
 
+## 📦 Data Management with DVC
+
+This project uses [DVC (Data Version Control)](https://dvc.org) to manage datasets stored in Google Cloud Storage.
+
+### Pulling Data from Remote Storage
+
+To download the project data into the `infra/data` folder:
+
+```bash
+# Activate the virtual environment
+source .venv/bin/activate
+
+# Pull data from GCS bucket
+dvc pull
+```
+
+This will download:
+- `infra/data/structured/vendor_spend.csv` - Vendor spend records
+- `infra/data/contracts/` - Generated contract PDFs
+
+### DVC Configuration
+
+- **Remote Storage**: `gs://project-cogent-2-dvc/dvc-store`
+- **Local Data Path**: `infra/data/`
+
+### First Time Setup
+
+If you're setting up the repository for the first time:
+
+1. Install dependencies (includes DVC):
+   ```bash
+   make install
+   ```
+
+2. Pull the data:
+   ```bash
+   source .venv/bin/activate
+   dvc pull
+   ```
+
+3. Proceed with infrastructure setup:
+   ```bash
+   make infra
+   ```
+
+> **Note**: You need access to the GCS bucket `project-cogent-2-dvc`. Ensure you're authenticated with `gcloud auth login` and have the necessary permissions.
+
 ## 📊 What the Demo Shows
 
 ### Sample Query
