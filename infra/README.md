@@ -1,42 +1,42 @@
-# Vendor Spend Analysis Agent - Infrastructure Setup
+# 🏗️ Infrastructure Setup: Vendor Spend Analysis
 
-This infrastructure setup provides a complete **Hybrid Search** demonstration combining:
-- **Structured Data** (BigQuery) - Vendor spend records
-- **Unstructured Data** (Vertex AI Search) - Contract PDFs
-- **The Trap** - Detects expired contracts still marked as Active
+This directory contains the automation logic to hydrate your Google Cloud project with the hybrid dataset (Structured + Unstructured) required for the **Project Cogent** Workstream #2 demo.
 
-## Overview
+---
 
-The infrastructure creates:
-1. **BigQuery Dataset** with 50 vendor records (6 with spend >$100M)
-2. **20 PDF Contracts** with varying compliance clauses
-3. **GCS Bucket** for document storage
-4. **Vertex AI Search Datastore** for contract indexing
-5. **The Trap**: Vendor ID 99 (Apex Logistics) - $200M spend, Active status, but contract EXPIRED 2024-12-31
+## 📋 Overview
+The setup process automates the creation of four key components:
+* **BigQuery:** A dataset containing 50 mock vendor records (SQL-ready).
+* **Cloud Storage:** A bucket containing 20 custom-generated PDF contracts.
+* **Vertex AI Search:** A search datastore that indexes the PDFs for semantic retrieval.
+* **The Trap:** Specifically creates **Vendor ID 99 (Apex Logistics)** with conflicting data between the ERP database and the legal PDF contract.
 
-## Prerequisites
+---
 
-- Google Cloud Project with billing enabled
-- `gcloud` CLI configured and authenticated
-- Python 3.10+ with `pip` or `uv`
-- Required GCP APIs enabled (auto-enabled by Makefile):
-  - BigQuery API
-  - Cloud Storage API
-  - Vertex AI Search API
-  - Discovery Engine API
+## 🛠️ Prerequisites
 
-## Quick Start
+* **Google Cloud Project:** Billing must be enabled.
+* **IAM Roles:** `Editor` or a combination of `BigQuery Admin`, `Storage Admin`, and `Discovery Engine Admin`.
+* **Local Tools:** Python 3.10+, `gcloud` CLI, and `make`.
 
-### 1. Set Your Project
+> [!TIP]
+> This project is optimized for [uv](https://github.com/astral-sh/uv). If installed, the setup will be significantly faster.
+
+---
+
+## 🚀 Quick Start
+
+### 1. Project Configuration
+Ensure your terminal is authenticated and pointed to the correct project:
 
 ```bash
 export PROJECT_ID="your-gcp-project-id"
 gcloud config set project $PROJECT_ID
 ```
 
-### 2. Run Infrastructure Setup
+### 2. Run Automation
 
-From the `infra/` directory:
+From the infra/ directory, run the following command. This will enable APIs, generate mock data, and deploy all cloud resources.
 
 ```bash
 make infra PROJECT_ID=$PROJECT_ID
@@ -53,7 +53,7 @@ This single command will:
 
 ### 3. Configure Your Agent
 
-Set environment variables for the agent:
+Once the infrastructure is ready, export these variables so the ADK Agent can connect to the tools:
 
 ```bash
 export GOOGLE_CLOUD_PROJECT=$PROJECT_ID
@@ -90,7 +90,7 @@ renewal_date: 2027-01-01  ← WRONG!
 **Contract PDF (`Apex_Logistics_MSA.pdf`):**
 - Section 2 (TERM AND TERMINATION) states:
 - **"This agreement shall terminate automatically on December 31, 2024."**
-- ✓ Contract is EXPIRED
+- ✓ Contract is EXPIRED (Current date: 2025-12-23)
 - ✓ Marked with "CONFIDENTIAL" watermark
 
 **The Issue:**
@@ -98,7 +98,7 @@ The database shows a future renewal date (2027), but the actual contract PDF sho
 
 ### Contract Compliance Variations
 
-The 20 PDF contracts include variations in key clauses:
+The 20 PDF contracts include variations in key clauses to test agent reasoning:
 
 **Indemnification Clause Types:**
 - `standard`: Normal indemnification coverage
@@ -173,7 +173,7 @@ gcloud beta discovery-engine data-stores list \
 
 ## Cleanup
 
-To remove all created infrastructure:
+To remove all created infrastructure and avoid ongoing costs:
 
 ```bash
 # Delete BigQuery dataset
@@ -191,7 +191,7 @@ gcloud beta discovery-engine data-stores delete vendor-analysis-datastore \
 make clean
 ```
 
-## Troubleshooting
+## ❓ Troubleshooting
 
 ### "Permission denied" errors
 
@@ -250,7 +250,7 @@ The setup scripts will skip creation if resources already exist. To force recrea
               └──────────────────┘  └─────────────────────┘
 ```
 
-## Next Steps
+## 📚 Next Steps
 
 After infrastructure setup:
 
