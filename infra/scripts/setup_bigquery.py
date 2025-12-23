@@ -1,4 +1,18 @@
 #!/usr/bin/env python3
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """
 Setup BigQuery dataset and load vendor spend data.
 
@@ -9,7 +23,6 @@ CSV data for the hybrid search demo.
 import argparse
 import sys
 from pathlib import Path
-
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 
@@ -23,7 +36,7 @@ def create_dataset(client: bigquery.Client, dataset_id: str, region: str) -> big
         print(f"Dataset {dataset_ref} already exists.")
         return dataset
     except NotFound:
-        print(f"Creating dataset {dataset_ref}...")
+        print(f"Creating dataset {dataset_ref} in {region}...")
         dataset = bigquery.Dataset(dataset_ref)
         dataset.location = region
         dataset = client.create_dataset(dataset, timeout=30)
@@ -36,7 +49,7 @@ def create_table_schema() -> list:
     return [
         bigquery.SchemaField("vendor_id", "INTEGER", mode="REQUIRED"),
         bigquery.SchemaField("vendor_name", "STRING", mode="REQUIRED"),
-        bigquery.SchemaField("total_spend_ytd", "INTEGER", mode="REQUIRED"),
+        bigquery.SchemaField("total_spend_ytd", "FLOAT", mode="REQUIRED"),
         bigquery.SchemaField("contract_filename", "STRING", mode="REQUIRED"),
         bigquery.SchemaField("renewal_date", "DATE", mode="REQUIRED"),
         bigquery.SchemaField("status", "STRING", mode="REQUIRED"),
@@ -83,7 +96,7 @@ def load_csv_to_table(
         )
 
     print(f"Loading data from {csv_path}...")
-    load_job.result()  # Wait for the job to complete
+    load_job.result()  # Wait for completion
 
     # Verify load
     table = client.get_table(table_ref)
@@ -105,30 +118,12 @@ def load_csv_to_table(
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Setup BigQuery dataset and load vendor spend data"
-    )
-    parser.add_argument(
-        "--project_id",
-        required=True,
-        help="GCP Project ID",
-    )
-    parser.add_argument(
-        "--dataset_id",
-        default="vendor_spend_dataset",
-        help="BigQuery dataset ID (default: vendor_spend_dataset)",
-    )
-    parser.add_argument(
-        "--table_id",
-        default="vendor_spend",
-        help="BigQuery table ID (default: vendor_spend)",
-    )
-    parser.add_argument(
-        "--region",
-        default="us-central1",
-        help="GCP region (default: us-central1)",
-    )
-
+    parser = argparse.ArgumentParser(description="Setup BigQuery dataset and load vendor spend data")
+    parser.add_argument("--project_id", required=True)
+    parser.add_argument("--dataset_id", default="vendor_spend_dataset")
+    parser.add_argument("--table_id", default="vendor_spend")
+    parser.add_argument("--region", default="us") # Match Makefile default
+    
     args = parser.parse_args()
 
     # Locate CSV file

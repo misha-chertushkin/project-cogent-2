@@ -1,4 +1,18 @@
 #!/usr/bin/env python3
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """
 Setup Vertex AI Search datastore and import contract documents.
 
@@ -13,6 +27,7 @@ from typing import Optional
 
 from google.api_core.client_options import ClientOptions
 from google.cloud import discoveryengine_v1 as discoveryengine
+from google.api_core.exceptions import AlreadyExists, NotFound
 
 
 def create_data_store(
@@ -170,29 +185,11 @@ def create_search_engine(
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Setup Vertex AI Search and import contract documents"
-    )
-    parser.add_argument(
-        "--project_id",
-        required=True,
-        help="GCP Project ID",
-    )
-    parser.add_argument(
-        "--data_store_id",
-        required=True,
-        help="Vertex AI Search data store ID",
-    )
-    parser.add_argument(
-        "--gcs_bucket",
-        required=True,
-        help="GCS bucket name containing contracts (without gs:// prefix)",
-    )
-    parser.add_argument(
-        "--region",
-        default="us",
-        help="Region for Vertex AI Search (default: us, options: us, eu, global)",
-    )
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--project_id", required=True)
+    parser.add_argument("--data_store_id", required=True)
+    parser.add_argument("--gcs_bucket", required=True)
+    parser.add_argument("--region", default="us")
 
     args = parser.parse_args()
 
