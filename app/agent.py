@@ -38,7 +38,7 @@ credentials, _ = google.auth.default()
 bq_tool_config = BigQueryToolConfig(write_mode=WriteMode.BLOCKED)
 bq_credentials_config = BigQueryCredentialsConfig(credentials=credentials)
 
-vertex_search_tool = VertexAiSearchTool(data_store_id=VERTEX_AI_SEARCH_DATASTORE,bypass_multi_tools_limit=True)
+search_documents = VertexAiSearchTool(data_store_id=VERTEX_AI_SEARCH_DATASTORE,bypass_multi_tools_limit=True)
 
 bigquery_toolset = BigQueryToolset(
     credentials_config=bq_credentials_config,
@@ -176,7 +176,7 @@ root_agent = Agent(
     instruction=INSTRUCTION,
     tools=[
         bigquery_toolset,   # All BigQuery capabilities
-        vertex_search_tool,   # Document search
+        search_documents,   # Document search
     ],
     generate_content_config=genai_types.GenerateContentConfig(
         temperature=0.1,  # Low temperature for consistent, factual analysis
