@@ -29,6 +29,7 @@ from google.adk.tools.bigquery.config import BigQueryToolConfig, WriteMode
 from google.genai import types as genai_types
 from google.adk.tools import VertexAiSearchTool
 from app.config import MODEL_NAME, PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID,VERTEX_AI_SEARCH_DATASTORE
+from app.tools import search_documents
 
 # Configure BigQuery toolset with read-only access
 # Uses Application Default Credentials (ADC)
@@ -38,7 +39,9 @@ credentials, _ = google.auth.default()
 bq_tool_config = BigQueryToolConfig(write_mode=WriteMode.BLOCKED)
 bq_credentials_config = BigQueryCredentialsConfig(credentials=credentials)
 
-vertex_search_tool = VertexAiSearchTool(data_store_id=VERTEX_AI_SEARCH_DATASTORE,bypass_multi_tools_limit=True)
+# Use this if the Vertex AI Search datastore is in 'global' location - this is a built in tool from ADK 
+# vertex_search_tool = VertexAiSearchTool(data_store_id=VERTEX_AI_SEARCH_DATASTORE,bypass_multi_tools_limit=True)
+
 
 bigquery_toolset = BigQueryToolset(
     credentials_config=bq_credentials_config,
@@ -175,8 +178,9 @@ root_agent = Agent(
     model=MODEL_NAME,
     instruction=INSTRUCTION,
     tools=[
-        bigquery_toolset,   # All BigQuery capabilities
-        vertex_search_tool,   # Document search
+        bigquery_toolset, # All BigQuery capabilities
+        search_documents,   # Vertex AI Document search - Use this if the Vertex AI search datastore is in a location which is NOT 'global'
+       # vertex_search_tool,  # Vertex AI Document Search - Use this if the Vertex AI Search datastore is in 'global' location - this is a built in tool from ADK 
     ],
     generate_content_config=genai_types.GenerateContentConfig(
         temperature=0.1,  # Low temperature for consistent, factual analysis
