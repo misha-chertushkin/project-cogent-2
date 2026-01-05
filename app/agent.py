@@ -27,8 +27,9 @@ from google.adk.apps.app import App
 from google.adk.tools.bigquery import BigQueryCredentialsConfig, BigQueryToolset
 from google.adk.tools.bigquery.config import BigQueryToolConfig, WriteMode
 from google.genai import types as genai_types
-from google.adk.tools import VertexAiSearchTool
+# from google.adk.tools import VertexAiSearchTool #This built in tool can be used if the region is set to global 
 from app.config import MODEL_NAME, PROJECT_ID, BQ_DATASET_ID, BQ_TABLE_ID,VERTEX_AI_SEARCH_DATASTORE
+from app.tools import DiscoveryEngineSearchTool
 
 # Configure BigQuery toolset with read-only access
 # Uses Application Default Credentials (ADC)
@@ -38,8 +39,9 @@ credentials, _ = google.auth.default()
 bq_tool_config = BigQueryToolConfig(write_mode=WriteMode.BLOCKED)
 bq_credentials_config = BigQueryCredentialsConfig(credentials=credentials)
 
-vertex_search_tool = VertexAiSearchTool(data_store_id=VERTEX_AI_SEARCH_DATASTORE,bypass_multi_tools_limit=True)
-
+#This built in tool can be used if the region is set to global 
+#vertex_search_tool = VertexAiSearchTool(data_store_id=VERTEX_AI_SEARCH_DATASTORE,bypass_multi_tools_limit=True)
+search_tool = DiscoveryEngineSearchTool(data_store_id=VERTEX_AI_SEARCH_DATASTORE)
 bigquery_toolset = BigQueryToolset(
     credentials_config=bq_credentials_config,
     bigquery_tool_config=bq_tool_config,
@@ -176,7 +178,7 @@ root_agent = Agent(
     instruction=INSTRUCTION,
     tools=[
         bigquery_toolset,   # All BigQuery capabilities
-        vertex_search_tool,   # Document search
+        search_tool,   # Document search
     ],
     generate_content_config=genai_types.GenerateContentConfig(
         temperature=0.1,  # Low temperature for consistent, factual analysis
