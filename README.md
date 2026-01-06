@@ -14,8 +14,19 @@ This project demonstrates a complete **Hybrid Search** solution that combines:
 - **Unstructured Data** (Vertex AI Search) - Contract PDFs and legal documents
 - **AI Reasoning** (ADK Agent) - Intelligent correlation and risk detection
 
-**The Value Proposition:**
-Rather than building complex real-time connectors to legacy systems, this pattern extracts data once and enables powerful AI reasoning across both structured and unstructured sources.
+## 🎯 When to Use This Demo
+
+This repository is a reference implementation for **Hybrid Search Reasoning**. It is specifically designed for scenarios where transactional data (SQL) must be reconciled against unstructured ground truth (PDFs).
+
+### ✅ Ideal Use Cases
+* **Source of Truth Reconciliation:** Identifying discrepancies between a database (e.g., ERP renewal dates) and legal contracts (e.g., termination clauses).
+* **Procurement & Compliance Audits:** Automating risk detection in high-value vendor relationships.
+* **Heterogeneous Document Analysis:** Extracting insights from diverse legal papers that lack a standard template.
+
+### 🚀 Key Value Prop
+Unlike basic RAG, this agent doesn't just "find" information; it **reasons across systems** to detect data "traps" that traditional automation would miss.
+
+> 📖 **[Read the Full 'When to Use' Guide](docs/WHEN_TO_USE.md)** for deep-dive discovery questions and strategic selling points.
 
 ## 🏗️ Architecture
 
@@ -158,24 +169,37 @@ ACTION REQUIRED: Immediate contract review and legal verification needed.
 
 ```
 ge-multi-search/
-├── app/
-│   ├── agent.py              # Main agent definition
-│   └── tools.py              # Hybrid search tools (BQ + VAIS)
-├── infra/
+├── app/                      # Core Agent Application
+│   ├── agent.py              # Main ADK agent logic & reasoning
+│   ├── config.py             # App configuration and environment mapping
+│   ├── tools.py              # Hybrid search tool definitions (BQ + VAIS)
+│   └── __init__.py           
+├── docs/                     # Strategic & Sales Enablement
+│   └── WHEN_TO_USE.md        # Discovery guide & customer use cases
+├── infra/                    # Infrastructure & Data Hydration
 │   ├── data/
-│   │   ├── structured/       # vendor_spend.csv
-│   │   └── contracts/        # Generated PDFs
-│   ├── scripts/
-│   │   ├── generate_contracts.py    # PDF generation
-│   │   ├── setup_bigquery.py        # BQ hydration
-│   │   └── setup_vertex_ai_search.py # VAIS hydration
-│   ├── Makefile              # One-command setup
-│   └── README.md             # Infra documentation
-├── tests/
+│   │   ├── structured/       # Mock vendor_spend.csv
+│   │   └── contracts/        # Generated PDF ground truth
+│   ├── scripts/              # Automation scripts
+│   │   ├── check_datastore.py       # VAIS health check utility
+│   │   ├── generate_contracts.py    # PDF document generation
+│   │   ├── setup_bigquery.py        # BQ schema & data hydration
+│   │   └── setup_vertex_ai_search.py # VAIS datastore & engine setup
+│   ├── Makefile              # One-command automation
+│   ├── README.md             # Infrastructure-specific guide
+│   ├── infrastructure_metadata.json 
+│   └── requirements.txt      # Infrastructure-specific dependencies
+├── tests/                    # Test Suites
 │   ├── integration/
-│   │   └── test_agent.py         # E2E test with trap detection
-│   └── test_agent_verbose.py     # Verbose test showing tool calls
-└── README.md                      # This file
+│   │   └── test_agent.py         # E2E test for the "Apex Trap"
+│   └── unit/
+│       ├── test_agent_verbose.py # Log-heavy tool orchestration test
+│       └── test_dummy.py
+├── GEMINI.md                 # Project-specific AI notes
+├── LICENSE                   # Apache 2.0 License
+├── README.md                 # Main overview and Quick Start
+├── pyproject.toml            # Project metadata and dependencies
+└── uv.lock                   # Lockfile for reproducible environments
 ```
 
 ## 📚 Documentation
