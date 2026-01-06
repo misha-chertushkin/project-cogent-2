@@ -7,10 +7,17 @@ Environment variables can override defaults if needed.
 import os
 import google.auth
 
-# GCP Configuration - auto-detect project ID from credentials
-_, PROJECT_ID = google.auth.default()
-os.environ.setdefault("GOOGLE_CLOUD_PROJECT", PROJECT_ID)
-os.environ["GOOGLE_CLOUD_LOCATION"] = "global"
+
+# GCP Configuration - try auto-detect, fallback to env var for cloud runtime
+try:
+    _, PROJECT_ID = google.auth.default()
+except Exception:
+    PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
+
+# Default values for critical GCP parameters
+LOCATION = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
+os.environ.setdefault("GOOGLE_CLOUD_PROJECT", str(PROJECT_ID))
+os.environ.setdefault("GOOGLE_CLOUD_LOCATION", LOCATION)
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "True"
 
 # Model Configuration
