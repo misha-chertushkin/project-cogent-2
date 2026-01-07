@@ -80,7 +80,7 @@ This demonstrates real-world scenarios where:
 
 ```bash
 # 1️⃣ Install dependencies
-make install
+uv sync
 
 # 2️⃣ Setup infrastructure (generates PDFs, creates BigQuery + Vertex AI Search, ~5-10 mins)
 gcloud config set project YOUR-PROJECT-ID
@@ -99,7 +99,7 @@ Use this to demonstrate the complete data journey from Dynamics 365 → GCP → 
 
 ```bash
 # 1️⃣ Install dependencies
-make install
+uv sync
 
 # 2️⃣ Configure Dynamics 365 credentials
 cd infra
@@ -124,9 +124,9 @@ make demo-e2e
 # - Create Vertex AI Search datastore and index contracts
 # - Setup complete GCP infrastructure
 
-# 4️⃣ Run the agent
+# 5️⃣ Run the agent
 cd ..
-make playground
+uv run adk run app
 ```
 
 **That's it!** The agent will analyze vendors and detect the contract expiration trap.
