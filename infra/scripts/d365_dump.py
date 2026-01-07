@@ -6,16 +6,27 @@ import base64
 import logging
 import requests
 import msal
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 # ==================================================================================
 # CONFIGURATION
 # ==================================================================================
 
 # 1. DYNAMICS 365 CREDENTIALS
-TENANT_ID = "6a82c317-f46a-4f2e-be48-535e3d93ac4d"
-CLIENT_ID = "5fbc0563-aa65-47c5-b758-bbbc3ad9f8f4"
-CLIENT_SECRET = "pK~8Q~s4zfyZW0QOV6W8OVvf_K0F5TH3lzF1aa20" 
-RESOURCE_URL = "https://gcpvaislab2.crm.dynamics.com"
+TENANT_ID = os.getenv("D365_TENANT_ID")
+CLIENT_ID = os.getenv("D365_CLIENT_ID")
+CLIENT_SECRET = os.getenv("D365_CLIENT_SECRET")
+RESOURCE_URL = os.getenv("D365_RESOURCE_URL")
+
+if not all([TENANT_ID, CLIENT_ID, CLIENT_SECRET, RESOURCE_URL]):
+    raise ValueError(
+        "Missing D365 credentials. Please copy infra/.env.example to infra/.env and fill in your credentials."
+    )
 
 # 2. OUTPUT PATHS
 BASE_OUTPUT_DIR = "/home/chertushkin/project-cogent-2/infra/data"

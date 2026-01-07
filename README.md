@@ -73,23 +73,65 @@ This demonstrates real-world scenarios where:
 
 **Prerequisites**: Google Cloud Project with billing enabled, `gcloud` CLI authenticated (`gcloud auth login`), Python 3.10+ with `uv`
 
-### Three Simple Steps
+### Two Demo Modes
+
+#### Option 1: Standard Demo (Synthetic Data)
+
+Use this for quick demos without Dynamics 365.
 
 ```bash
 # 1️⃣ Install dependencies
 make install
 
-# 2️⃣ Setup infrastructure (BigQuery + Vertex AI Search, ~5-10 mins)
+# 2️⃣ Setup infrastructure (generates PDFs, creates BigQuery + Vertex AI Search, ~5-10 mins)
 gcloud config set project YOUR-PROJECT-ID
+cd infra
 make infra
 
 # 3️⃣ Run the agent
+cd ..
+make playground
+```
+
+#### Option 2: End-to-End Demo (with Dynamics 365)
+
+Use this to demonstrate the complete data journey from Dynamics 365 → GCP → Agent.
+
+```bash
+# 1️⃣ Install dependencies
+make install
+
+# 2️⃣ Configure Dynamics 365 credentials
+cd infra
+cp .env.example .env
+# Edit .env with your D365 credentials
+cd ..
+
+# 3️⃣ Pull production data from DVC
+dvc pull
+
+# 4️⃣ Run end-to-end infrastructure setup
+gcloud config set project YOUR-PROJECT-ID
+cd infra
+make demo-e2e
+
+# This will:
+# - Pull contract PDFs and CSV from DVC remote storage
+# - Upload data to Dynamics 365 CRM
+# - PAUSE for you to demo the D365 UI (press Enter to continue)
+# - Download data back from Dynamics 365
+# - Create BigQuery dataset and load vendor data
+# - Create Vertex AI Search datastore and index contracts
+# - Setup complete GCP infrastructure
+
+# 4️⃣ Run the agent
+cd ..
 make playground
 ```
 
 **That's it!** The agent will analyze vendors and detect the contract expiration trap.
 
-> **Note**: `make infra` automatically detects your project from `gcloud config`. You can also set `PROJECT_ID` environment variable to override.
+> **Note**: Both workflows automatically detect your project from `gcloud config`. You can also set `PROJECT_ID` environment variable to override.
 
 ### Alternative Testing Options
 ```bash
@@ -104,46 +146,55 @@ pytest tests/integration/test_agent.py -v
 
 This project uses [DVC (Data Version Control)](https://dvc.org) to manage datasets stored in Google Cloud Storage.
 
-### Pulling Data from Remote Storage
+### End-to-End Demo Workflow
 
-To download the project data into the `infra/data` folder:
+The `demo-e2e` target demonstrates a complete data journey:
 
-```bash
-# Activate the virtual environment
-source .venv/bin/activate
-
-# Pull data from GCS bucket
-dvc pull
+```
+DVC (GCS) → Local Files → Dynamics 365 → Local Files → GCP (BigQuery + VAIS)
 ```
 
-This will download:
-- `infra/data/structured/vendor_spend.csv` - Vendor spend records
-- `infra/data/contracts/` - Generated contract PDFs
+**Step-by-step flow:**
+
+1. **DVC Pull**: Downloads production data from GCS remote storage
+   - `infra/data/contracts_to_upload/` - Contract PDFs ready for D365
+   - `infra/data/structured_to_upload/vendor_spend.csv` - Vendor records
+
+2. **D365 Upload**: Uploads data to Dynamics 365 CRM
+   - Creates Account records with vendor metadata
+   - Attaches contract PDFs as annotations
+   - Creates Invoice records for spend tracking
+   - **PAUSES** for demo of D365 UI
+
+3. **D365 Download**: Extracts data back from Dynamics 365
+   - Downloads to `infra/data/contracts/`
+   - Generates CSV at `infra/data/structured/vendor_spend.csv`
+   - Preserves original vendor IDs for consistency
+
+4. **GCP Setup**: Creates cloud infrastructure
+   - Uploads PDFs to GCS bucket
+   - Loads CSV into BigQuery table
+   - Indexes contracts in Vertex AI Search
+
+### Manual DVC Operations
+
+To manually pull data:
+
+```bash
+# Pull all tracked data
+dvc pull
+
+# Pull specific files
+dvc pull infra/data/contracts_to_upload.dvc
+dvc pull infra/data/structured_to_upload/vendor_spend.csv.dvc
+```
 
 ### DVC Configuration
 
 - **Remote Storage**: `gs://project-cogent-2-dvc/dvc-store`
-- **Local Data Path**: `infra/data/`
-
-### First Time Setup
-
-If you're setting up the repository for the first time:
-
-1. Install dependencies (includes DVC):
-   ```bash
-   make install
-   ```
-
-2. Pull the data:
-   ```bash
-   source .venv/bin/activate
-   dvc pull
-   ```
-
-3. Proceed with infrastructure setup:
-   ```bash
-   make infra
-   ```
+- **Tracked Paths**:
+  - `infra/data/contracts_to_upload/` - Original contract PDFs
+  - `infra/data/structured_to_upload/vendor_spend.csv` - Original vendor data
 
 > **Note**: You need access to the GCS bucket `project-cogent-2-dvc`. Ensure you're authenticated with `gcloud auth login` and have the necessary permissions.
 
@@ -178,16 +229,20 @@ ge-multi-search/
 │   └── WHEN_TO_USE.md        # Discovery guide & customer use cases
 ├── infra/                    # Infrastructure & Data Hydration
 │   ├── data/
-│   │   ├── structured/       # Mock vendor_spend.csv
-│   │   └── contracts/        # Generated PDF ground truth
+│   │   ├── contracts_to_upload/     # [DVC] Original PDFs for D365 upload
+│   │   ├── structured_to_upload/    # [DVC] Original CSV for D365 upload
+│   │   ├── contracts/               # Downloaded/Generated contract PDFs
+│   │   └── structured/              # Generated vendor_spend.csv
 │   ├── scripts/              # Automation scripts
 │   │   ├── check_datastore.py       # VAIS health check utility
-│   │   ├── generate_contracts.py    # PDF document generation
+│   │   ├── d365_backfill.py         # Upload data to Dynamics 365
+│   │   ├── d365_dump.py             # Download data from Dynamics 365
+│   │   ├── generate_contracts.py    # PDF document generation (synthetic)
 │   │   ├── setup_bigquery.py        # BQ schema & data hydration
 │   │   └── setup_vertex_ai_search.py # VAIS datastore & engine setup
-│   ├── Makefile              # One-command automation
+│   ├── Makefile              # One-command automation (infra, demo-e2e)
 │   ├── README.md             # Infrastructure-specific guide
-│   ├── infrastructure_metadata.json 
+│   ├── infrastructure_metadata.json
 │   └── requirements.txt      # Infrastructure-specific dependencies
 ├── tests/                    # Test Suites
 │   ├── integration/
