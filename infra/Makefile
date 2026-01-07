@@ -10,7 +10,7 @@ TABLE_ID ?= vendor_spend
 GCS_BUCKET ?= $(PROJECT_ID)-$(PROJECT_NAME)-contracts
 DATA_STORE_ID ?= $(PROJECT_NAME)-datastore
 
-.PHONY: help install-deps generate-pdfs setup-gcs setup-bq setup-vais infra clean
+.PHONY: help install-deps generate-pdfs setup-gcs setup-bq setup-vais infra clean deploy-agent
 
 help:
 	@echo "Available targets:"
@@ -73,6 +73,10 @@ setup-vais:
 	@echo "Setting up Vertex AI Search datastore: $(DATA_STORE_ID)..."
 	uv run python scripts/setup_vertex_ai_search.py --project_id $(PROJECT_ID) --data_store_id $(DATA_STORE_ID) --gcs_bucket $(GCS_BUCKET) --region $(DATA_STORE_REGION)
 	@echo "Vertex AI Search setup complete. Data Store ID: $(DATA_STORE_ID)"
+
+deploy-agent:
+	@echo "🚀 Deploying ADK Agent to Vertex AI Reasoning Engine..."
+	uv run python scripts/deploy_agent.py
 
 infra: install-deps setup-gcs setup-bq setup-vais
 	@echo ""
