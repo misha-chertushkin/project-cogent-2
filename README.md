@@ -73,7 +73,7 @@ This demonstrates real-world scenarios where:
 
 **Prerequisites**: Google Cloud Project with billing enabled, `gcloud` CLI authenticated (`gcloud auth login`), Python 3.10+ with `uv`
 
-### Three Simple Steps
+### Four Simple Steps to Success
 
 ```bash
 # 1️⃣ Install dependencies
@@ -83,11 +83,15 @@ make install
 gcloud config set project YOUR-PROJECT-ID
 make infra
 
-# 3️⃣ Run the agent
-make playground
-```
+# 3️⃣ Launch the Agent
+uv run adk run app
+
+# 4️⃣ Run the Demo
+# Use the "Golden Queries" from PROMPTS.md to trigger the Apex Trap.
 
 **That's it!** The agent will analyze vendors and detect the contract expiration trap.
+
+🕹️ Pro-Tip: Open PROMPTS.md for a copy-paste list of high-impact queries to use during your live demo.
 
 > **Note**: `make infra` automatically detects your project from `gcloud config`. You can also set `PROJECT_ID` environment variable to override.
 
@@ -176,6 +180,8 @@ ge-multi-search/
 │   └── __init__.py           
 ├── docs/                     # Strategic & Sales Enablement
 │   └── WHEN_TO_USE.md        # Discovery guide & customer use cases
+├── evals/                    # Quality & Validation
+│   └── scenarios.md          # 6 Detailed engineering test cases
 ├── infra/                    # Infrastructure & Data Hydration
 │   ├── data/
 │   │   ├── structured/       # Mock vendor_spend.csv
@@ -197,8 +203,9 @@ ge-multi-search/
 │       └── test_dummy.py
 ├── GEMINI.md                 # Project-specific AI notes
 ├── LICENSE                   # Apache 2.0 License
-├── README.md                 # Main overview and Quick Start
+├── PROMPTS.md                # "Greatest Hits" Demo Menu
 ├── pyproject.toml            # Project metadata and dependencies
+├── README.md                 # Main overview and Quick Start
 └── uv.lock                   # Lockfile for reproducible environments
 ```
 
@@ -207,6 +214,8 @@ ge-multi-search/
 - **Infrastructure Setup:** [infra/README.md](infra/README.md)
 - **ADK Documentation:** https://github.com/google/adk-python
 - **Vertex AI Search:** https://cloud.google.com/generative-ai-app-builder
+- **Demo Menu (Golden Queries):** [PROMPTS.md](./PROMPTS.md)
+- **Engineering Test Scenarios:** [evals/scenarios.md](./evals/scenarios.md)
 
 ## 🐛 Troubleshooting
 
