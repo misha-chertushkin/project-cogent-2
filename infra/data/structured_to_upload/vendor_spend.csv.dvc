@@ -1,0 +1,5 @@
+outs:
+- md5: b3973d7f038c98cc4de6212975b1a47c
+  size: 4383
+  hash: md5
+  path: vendor_spend.csv

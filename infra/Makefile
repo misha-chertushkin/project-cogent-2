@@ -8,17 +8,21 @@ PROJECT_NAME ?= vendor-analysis
 DATASET_ID ?= vendor_spend_dataset
 TABLE_ID ?= vendor_spend
 GCS_BUCKET ?= $(PROJECT_ID)-$(PROJECT_NAME)-contracts
-DATA_STORE_ID ?= $(PROJECT_NAME)-datastore
+DATA_STORE_ID ?= $(PROJECT_NAME)-datastore-v2
 
-.PHONY: help install-deps generate-pdfs setup-gcs setup-bq setup-vais infra clean
+.PHONY: help install-deps generate-pdfs setup-gcs setup-bq setup-vais infra clean dvc-pull d365-upload d365-download demo-e2e
 
 help:
 	@echo "Available targets:"
 	@echo "  infra           - Run all setup steps (install-deps, setup-gcs, setup-bq, setup-vais)"
+	@echo "  demo-e2e        - End-to-end demo: DVC pull → D365 upload → D365 download → GCP setup"
+	@echo "  dvc-pull        - Pull contract PDFs and CSV from DVC remote storage"
+	@echo "  d365-upload     - Upload contracts and data to Dynamics 365"
+	@echo "  d365-download   - Download contracts and data from Dynamics 365"
 	@echo "  setup-gcs       - Create GCS bucket and upload contracts"
 	@echo "  setup-bq        - Create BigQuery dataset and load vendor data"
 	@echo "  setup-vais      - Create Vertex AI Search datastore and index contracts"
-	@echo "  clean         - Remove local generated files"
+	@echo "  clean           - Remove local generated files"
 
 # --- Main Setup Workflow ---
 infra: check-env enable-apis install-deps generate-pdfs setup-gcs setup-bq setup-vais
@@ -89,6 +93,50 @@ infra: install-deps setup-gcs setup-bq setup-vais
 	@echo "1. Configure your ADK agent with these resource IDs"
 	@echo "2. Run 'make test' from the project root to test the agent"
 	@echo "=============================================="
+
+# --- End-to-End Demo Workflow ---
+demo-e2e: check-env enable-apis install-deps dvc-pull d365-upload d365-download setup-gcs setup-bq setup-vais
+	@echo ""
+	@echo "=============================================="
+	@echo "✅ End-to-end demo setup complete!"
+	@echo "=============================================="
+	@echo "Project ID:       $(PROJECT_ID)"
+	@echo "GCS Bucket:       gs://$(GCS_BUCKET)"
+	@echo "BigQuery Table:   $(PROJECT_ID).$(DATASET_ID).$(TABLE_ID)"
+	@echo "VAIS Data Store:  $(DATA_STORE_ID)"
+	@echo "=============================================="
+	@echo "Demo complete! Data journey:"
+	@echo "  1. ✓ DVC → Local files"
+	@echo "  2. ✓ Local files → Dynamics 365"
+	@echo "  3. ✓ Dynamics 365 → Local files"
+	@echo "  4. ✓ Local files → GCP (GCS, BigQuery, VAIS)"
+	@echo "=============================================="
+
+dvc-pull:
+	@echo "📦 Pulling data from DVC remote storage..."
+	dvc pull
+	@echo "DVC pull complete."
+	@echo "  - PDFs downloaded to: data/contracts_to_upload/"
+	@echo "  - CSV downloaded to: data/structured_to_upload/vendor_spend.csv"
+
+d365-upload:
+	@echo "⬆️  Uploading contracts and data to Dynamics 365..."
+	uv run python scripts/d365_backfill.py || python scripts/d365_backfill.py
+	@echo ""
+	@echo "=============================================="
+	@echo "⏸️  PAUSE: Demo the Dynamics 365 UI"
+	@echo "=============================================="
+	@echo "Data has been uploaded to Dynamics 365."
+	@echo "Please demo the D365 UI to show the data."
+	@echo ""
+	@read -p "Press Enter to continue after demoing D365 UI..." dummy
+
+d365-download:
+	@echo "⬇️  Downloading contracts and data from Dynamics 365..."
+	uv run python scripts/d365_dump.py || python scripts/d365_dump.py
+	@echo "D365 download complete."
+	@echo "  - PDFs downloaded to: data/contracts/"
+	@echo "  - CSV generated at: data/structured/vendor_spend.csv"
 
 clean:
 	@echo "🧹 Cleaning local generated files..."
