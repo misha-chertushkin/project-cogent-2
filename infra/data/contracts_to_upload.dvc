@@ -1,0 +1,6 @@
+outs:
+- md5: d15298f5a008f6458761892b2ae165bd.dir
+  size: 1336484
+  nfiles: 21
+  hash: md5
+  path: contracts_to_upload

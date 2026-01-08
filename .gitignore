@@ -267,3 +267,12 @@ my_env.tfvars
 
 # A2A Inspector
 tools/a2a-inspector/
+
+/infra/data/*
+!/infra/data/*.dvc
+!/infra/data/structured/
+/infra/data/structured/*
+!/infra/data/structured/*.dvc
+!/infra/data/structured_to_upload/
+/infra/data/structured_to_upload/*
+!/infra/data/structured_to_upload/*.dvc

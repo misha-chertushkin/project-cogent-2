@@ -37,7 +37,7 @@ def create_table_schema() -> list:
         bigquery.SchemaField("vendor_id", "INTEGER", mode="REQUIRED"),
         bigquery.SchemaField("vendor_name", "STRING", mode="REQUIRED"),
         bigquery.SchemaField("total_spend_ytd", "INTEGER", mode="REQUIRED"),
-        bigquery.SchemaField("contract_filename", "STRING", mode="REQUIRED"),
+        bigquery.SchemaField("contract_filename", "STRING", mode="NULLABLE"),  # Some vendors may not have contracts
         bigquery.SchemaField("renewal_date", "DATE", mode="REQUIRED"),
         bigquery.SchemaField("status", "STRING", mode="REQUIRED"),
         bigquery.SchemaField("category", "STRING", mode="REQUIRED"),
