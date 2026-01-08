@@ -98,24 +98,17 @@ uv run adk run app
 Use this to demonstrate the complete data journey from Dynamics 365 → GCP → Agent.
 
 ```bash
-# 1️⃣ Install dependencies
-uv sync
-
-# 2️⃣ Configure Dynamics 365 credentials
+# 1️⃣ Configure Dynamics 365 credentials
 cd infra
 cp .env.example .env
 # Edit .env with your D365 credentials
-cd ..
 
-# 3️⃣ Pull production data from DVC
-dvc pull
-
-# 4️⃣ Run end-to-end infrastructure setup
+# 2️⃣ Run end-to-end infrastructure setup (handles all dependencies automatically)
 gcloud config set project YOUR-PROJECT-ID
-cd infra
 make demo-e2e
 
 # This will:
+# - Install all project dependencies (including DVC)
 # - Pull contract PDFs and CSV from DVC remote storage
 # - Upload data to Dynamics 365 CRM
 # - PAUSE for you to demo the D365 UI (press Enter to continue)
@@ -124,7 +117,7 @@ make demo-e2e
 # - Create Vertex AI Search datastore and index contracts
 # - Setup complete GCP infrastructure
 
-# 5️⃣ Run the agent
+# 3️⃣ Run the agent
 cd ..
 uv run adk run app
 ```

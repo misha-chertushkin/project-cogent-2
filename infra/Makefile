@@ -10,7 +10,7 @@ TABLE_ID ?= vendor_spend
 GCS_BUCKET ?= $(PROJECT_ID)-$(PROJECT_NAME)-contracts
 DATA_STORE_ID ?= $(PROJECT_NAME)-datastore-v2
 
-.PHONY: help install-deps generate-pdfs setup-gcs setup-bq setup-vais infra clean dvc-pull d365-upload d365-download demo-e2e
+.PHONY: help sync-deps install-deps generate-pdfs setup-gcs setup-bq setup-vais infra clean dvc-pull d365-upload d365-download demo-e2e
 
 help:
 	@echo "Available targets:"
@@ -51,6 +51,11 @@ enable-apis:
 		storage.googleapis.com \
 		discoveryengine.googleapis.com \
 		aiplatform.googleapis.com
+
+sync-deps:
+	@echo "🔄 Syncing project dependencies (including DVC)..."
+	@cd .. && uv sync
+	@echo "✅ All project dependencies installed."
 
 install-deps:
 	@echo "Installing Python dependencies..."
@@ -95,7 +100,7 @@ infra: install-deps setup-gcs setup-bq setup-vais
 	@echo "=============================================="
 
 # --- End-to-End Demo Workflow ---
-demo-e2e: check-env enable-apis install-deps dvc-pull d365-upload d365-download setup-gcs setup-bq setup-vais
+demo-e2e: check-env enable-apis sync-deps install-deps dvc-pull d365-upload d365-download setup-gcs setup-bq setup-vais
 	@echo ""
 	@echo "=============================================="
 	@echo "✅ End-to-end demo setup complete!"
