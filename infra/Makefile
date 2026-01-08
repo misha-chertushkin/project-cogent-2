@@ -119,7 +119,7 @@ demo-e2e: check-env enable-apis sync-deps install-deps dvc-pull d365-upload d365
 
 dvc-pull:
 	@echo "📦 Pulling data from DVC remote storage..."
-	dvc pull
+	@cd .. && uv run dvc pull
 	@echo "DVC pull complete."
 	@echo "  - PDFs downloaded to: data/contracts_to_upload/"
 	@echo "  - CSV downloaded to: data/structured_to_upload/vendor_spend.csv"
