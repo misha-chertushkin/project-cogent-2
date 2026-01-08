@@ -26,8 +26,8 @@ if not all([TENANT_ID, CLIENT_ID, CLIENT_SECRET, RESOURCE_URL]):
     )
 
 # PATHS
-CSV_PATH = "/home/chertushkin/project-cogent-2/infra/data/structured_to_upload/vendor_spend.csv"
-PDF_DIR = "/home/chertushkin/project-cogent-2/infra/data/contracts_to_upload"
+CSV_PATH = Path(__file__).parent.parent / "data" / "structured_to_upload" / "vendor_spend.csv"
+PDF_DIR = Path(__file__).parent.parent / "data" / "contracts_to_upload"
 
 # API
 API_VERSION = "v9.2"
@@ -75,7 +75,8 @@ def create_account(headers, name, description="Created by Master Seed"):
     """Creates account and returns ID."""
     payload = {"name": name, "description": description}
     res = requests.post(f"{BASE_URL}/accounts", headers=headers, json=payload)
-    
+    res.raise_for_status()
+
     if res.status_code == 204:
         entity_url = res.headers.get("OData-EntityId")
         return entity_url.split("(")[1].split(")")[0]
@@ -89,12 +90,13 @@ def create_invoice(headers, account_id, amount):
         "totalamount": amount,
         "customerid_account@odata.bind": f"/accounts({account_id})"
     }
-    requests.post(f"{BASE_URL}/invoices", headers=headers, json=payload)
+    res = requests.post(f"{BASE_URL}/invoices", headers=headers, json=payload)
+    res.raise_for_status()
 
 def upload_pdf(headers, account_id, filename):
     """Uploads PDF from local folder to account."""
-    full_path = os.path.join(PDF_DIR, filename)
-    if not os.path.exists(full_path):
+    full_path = PDF_DIR / filename
+    if not full_path.exists():
         print(f"   [WARNING] File missing locally: {filename}")
         return
 
@@ -109,7 +111,8 @@ def upload_pdf(headers, account_id, filename):
         "mimetype": "application/pdf",
         "objectid_account@odata.bind": f"/accounts({account_id})"
     }
-    requests.post(f"{BASE_URL}/annotations", headers=headers, json=payload)
+    res = requests.post(f"{BASE_URL}/annotations", headers=headers, json=payload)
+    res.raise_for_status()
 
 # ==================================================================================
 # MAIN LOGIC
@@ -156,9 +159,9 @@ def main():
     # PHASE 2: PROCESS UNSTRUCTURED DATA (ALL FILES)
     # --------------------------------------------------------------------------
     print("\n[PHASE 2] Uploading ALL PDFs from Folder...")
-    
-    if os.path.exists(PDF_DIR):
-        files = [f for f in os.listdir(PDF_DIR) if f.lower().endswith(".pdf")]
+
+    if PDF_DIR.exists():
+        files = [f.name for f in PDF_DIR.iterdir() if f.suffix.lower() == ".pdf"]
         
         for filename in sorted(files):
             # Infer name (e.g. "Apex_Logistics_MSA.pdf" -> "Apex Logistics")

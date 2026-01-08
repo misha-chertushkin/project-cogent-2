@@ -2,16 +2,27 @@ import os
 import csv
 import requests
 import msal
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 # ==================================================================================
 # CONFIGURATION
 # ==================================================================================
-TENANT_ID = "6a82c317-f46a-4f2e-be48-535e3d93ac4d"
-CLIENT_ID = "5fbc0563-aa65-47c5-b758-bbbc3ad9f8f4"
-CLIENT_SECRET = "pK~8Q~s4zfyZW0QOV6W8OVvf_K0F5TH3lzF1aa20" # Re-paste your secret
-RESOURCE_URL = "https://gcpvaislab2.crm.dynamics.com"
+TENANT_ID = os.getenv("D365_TENANT_ID")
+CLIENT_ID = os.getenv("D365_CLIENT_ID")
+CLIENT_SECRET = os.getenv("D365_CLIENT_SECRET")
+RESOURCE_URL = os.getenv("D365_RESOURCE_URL")
 
-CSV_PATH = "/home/chertushkin/project-cogent-2/infra/data/structured_to_upload/vendor_spend.csv"
+if not all([TENANT_ID, CLIENT_ID, CLIENT_SECRET, RESOURCE_URL]):
+    raise ValueError(
+        "Missing D365 credentials. Please copy infra/.env.example to infra/.env and fill in your credentials."
+    )
+
+CSV_PATH = Path(__file__).parent.parent / "data" / "structured_to_upload" / "vendor_spend.csv"
 
 API_VERSION = "v9.2"
 BASE_URL = f"{RESOURCE_URL}/api/data/{API_VERSION}"
@@ -36,14 +47,16 @@ def delete_related_invoices(headers, account_id):
     """Finds and deletes all invoices linked to this Account ID."""
     # Filter for invoices where the customer (account) matches the ID
     query_url = f"{BASE_URL}/invoices?$select=invoiceid&$filter=_customerid_value eq '{account_id}'"
-    
+
     response = requests.get(query_url, headers=headers)
-    
+    response.raise_for_status()
+
     if response.status_code == 200:
         invoices = response.json().get('value', [])
         for inv in invoices:
             inv_id = inv['invoiceid']
             del_res = requests.delete(f"{BASE_URL}/invoices({inv_id})", headers=headers)
+            del_res.raise_for_status()
             if del_res.status_code == 204:
                 print(f"   -> [CLEANED] Deleted child invoice: {inv_id}")
             else:
@@ -53,9 +66,10 @@ def delete_vendor_accounts(headers, vendor_name):
     """Finds ALL accounts with this name, cleans children, and deletes them."""
     safe_name = vendor_name.replace("'", "''")
     query_url = f"{BASE_URL}/accounts?$select=accountid&$filter=name eq '{safe_name}'"
-    
+
     response = requests.get(query_url, headers=headers)
-    
+    response.raise_for_status()
+
     if response.status_code == 200:
         accounts = response.json().get('value', [])
         
@@ -71,7 +85,8 @@ def delete_vendor_accounts(headers, vendor_name):
             
             # STEP 2: Delete Parent (Account)
             del_res = requests.delete(f"{BASE_URL}/accounts({acc_id})", headers=headers)
-            
+            del_res.raise_for_status()
+
             if del_res.status_code == 204:
                 print(f"[DELETED] {vendor_name} ({acc_id})")
             else:
@@ -95,7 +110,7 @@ def main():
         print(f"Auth Error: {e}")
         return
 
-    if not os.path.exists(CSV_PATH):
+    if not CSV_PATH.exists():
         print("CSV not found.")
         return
 

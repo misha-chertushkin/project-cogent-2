@@ -29,9 +29,9 @@ if not all([TENANT_ID, CLIENT_ID, CLIENT_SECRET, RESOURCE_URL]):
     )
 
 # 2. OUTPUT PATHS
-BASE_OUTPUT_DIR = "/home/chertushkin/project-cogent-2/infra/data"
-OUTPUT_CSV_PATH = os.path.join(BASE_OUTPUT_DIR, "structured", "vendor_spend.csv")
-OUTPUT_PDF_DIR = os.path.join(BASE_OUTPUT_DIR, "contracts")
+BASE_OUTPUT_DIR = Path(__file__).parent.parent / "data"
+OUTPUT_CSV_PATH = BASE_OUTPUT_DIR / "structured" / "vendor_spend.csv"
+OUTPUT_PDF_DIR = BASE_OUTPUT_DIR / "contracts"
 
 # 3. API CONFIG
 API_VERSION = "v9.2"
@@ -79,8 +79,9 @@ class DynamicsExtractor:
         """Retrieves all accounts with key fields."""
         logger.info("Fetching all accounts from Dynamics 365...")
         query = f"{BASE_URL}/accounts?$select=name,accountid,description"
-        
+
         response = requests.get(query, headers=self.headers)
+        response.raise_for_status()
         if response.status_code == 200:
             accounts = response.json().get('value', [])
             logger.info(f"Found {len(accounts)} accounts.")
@@ -92,10 +93,11 @@ class DynamicsExtractor:
     def fetch_spend_for_account(self, account_id):
         """Sums up all 'Active' or 'New' invoices for a specific account."""
         query = f"{BASE_URL}/invoices?$select=totalamount&$filter=_customerid_value eq '{account_id}'"
-        
+
         response = requests.get(query, headers=self.headers)
+        response.raise_for_status()
         total_spend = 0.0
-        
+
         if response.status_code == 200:
             invoices = response.json().get('value', [])
             for inv in invoices:
@@ -111,10 +113,11 @@ class DynamicsExtractor:
         Returns a semicolon-separated string of filenames.
         """
         query = f"{BASE_URL}/annotations?$filter=_objectid_value eq '{account_id}' and isdocument eq true"
-        
+
         response = requests.get(query, headers=self.headers)
+        response.raise_for_status()
         downloaded_files = []
-        
+
         if response.status_code == 200:
             notes = response.json().get('value', [])
             
@@ -130,7 +133,7 @@ class DynamicsExtractor:
                             
                             # Clean filename
                             safe_name = re.sub(r'[\\/*?:"<>|]', "", note_filename)
-                            save_path = os.path.join(OUTPUT_PDF_DIR, safe_name)
+                            save_path = OUTPUT_PDF_DIR / safe_name
                             
                             # Handle Duplicate Filenames locally by appending counter if needed
                             # (Optional refinement for very strict systems, but simple overwrite is standard for demos)
@@ -168,14 +171,14 @@ def parse_description_metadata(description):
     return vendor_id, renewal_date, status
 
 def ensure_directories():
-    if not os.path.exists(OUTPUT_PDF_DIR):
-        os.makedirs(OUTPUT_PDF_DIR)
+    if not OUTPUT_PDF_DIR.exists():
+        OUTPUT_PDF_DIR.mkdir(parents=True, exist_ok=True)
         logger.info(f"Created directory: {OUTPUT_PDF_DIR}")
 
     # Ensure structured directory exists for CSV
-    csv_dir = os.path.dirname(OUTPUT_CSV_PATH)
-    if not os.path.exists(csv_dir):
-        os.makedirs(csv_dir)
+    csv_dir = OUTPUT_CSV_PATH.parent
+    if not csv_dir.exists():
+        csv_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"Created directory: {csv_dir}")
 
 # ==================================================================================
