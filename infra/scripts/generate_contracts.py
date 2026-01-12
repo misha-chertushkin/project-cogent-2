@@ -8,6 +8,7 @@ that has an expired termination date.
 """
 
 import os
+import csv
 from datetime import datetime
 from pathlib import Path
 
@@ -28,6 +29,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "Premier Logistics Inc",
         "vendor_id": 3,
+        "spend": 120000000,
+        "category": "Strategic",
         "effective_date": "January 1, 2023",
         "termination_date": "December 1, 2025",
         "indemnification": "standard",
@@ -37,6 +40,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "Precision Manufacturing",
         "vendor_id": 6,
+        "spend": 150000000,
+        "category": "Strategic",
         "effective_date": "March 15, 2023",
         "termination_date": "November 30, 2025",
         "indemnification": "enhanced",
@@ -46,6 +51,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "Alpha Systems Inc",
         "vendor_id": 12,
+        "spend": 175000000,
+        "category": "Strategic",
         "effective_date": "June 1, 2023",
         "termination_date": "January 15, 2026",
         "indemnification": "missing",  # RISK: Missing indemnification
@@ -55,6 +62,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "Zeta Corporation",
         "vendor_id": 18,
+        "spend": 130000000,
+        "category": "Strategic",
         "effective_date": "September 1, 2023",
         "termination_date": "December 20, 2025",
         "indemnification": "standard",
@@ -64,6 +73,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "Quantum Dynamics",
         "vendor_id": 38,
+        "spend": 112000000,
+        "category": "Strategic",
         "effective_date": "April 1, 2023",
         "termination_date": "November 25, 2025",
         "indemnification": "risky",  # RISK: Risky indemnification clause
@@ -74,6 +85,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "Apex Logistics",
         "vendor_id": 99,
+        "spend": 200000000,
+        "category": "Strategic",
         "effective_date": "January 1, 2022",
         "termination_date": "December 31, 2024",  # EXPIRED!
         "indemnification": "standard",
@@ -85,6 +98,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "Acme Corporation",
         "vendor_id": 1,
+        "spend": 50000,
+        "category": "Low-Value",
         "effective_date": "February 1, 2023",
         "termination_date": "June 15, 2025",
         "indemnification": "standard",
@@ -94,6 +109,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "Global Tech Solutions",
         "vendor_id": 2,
+        "spend": 85000000,
+        "category": "Major",
         "effective_date": "May 1, 2023",
         "termination_date": "September 30, 2025",
         "indemnification": "enhanced",
@@ -103,6 +120,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "DataFlow Systems",
         "vendor_id": 4,
+        "spend": 12000000,
+        "category": "Standard",
         "effective_date": "July 15, 2023",
         "termination_date": "March 15, 2025",
         "indemnification": "standard",
@@ -112,6 +131,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "CloudNine Services",
         "vendor_id": 5,
+        "spend": 9000000,
+        "category": "Standard",
         "effective_date": "August 1, 2023",
         "termination_date": "July 20, 2025",
         "indemnification": "missing",
@@ -121,6 +142,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "NextGen Analytics",
         "vendor_id": 10,
+        "spend": 25000000,
+        "category": "Major",
         "effective_date": "October 1, 2023",
         "termination_date": "October 12, 2025",
         "indemnification": "standard",
@@ -130,6 +153,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "Delta Logistics",
         "vendor_id": 15,
+        "spend": 60000000,
+        "category": "Major",
         "effective_date": "November 15, 2023",
         "termination_date": "September 5, 2025",
         "indemnification": "enhanced",
@@ -139,6 +164,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "Kappa Industries",
         "vendor_id": 22,
+        "spend": 4000000,
+        "category": "Standard",
         "effective_date": "December 1, 2023",
         "termination_date": "October 28, 2025",
         "indemnification": "risky",
@@ -148,6 +175,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "Pi Manufacturing",
         "vendor_id": 28,
+        "spend": 15000000,
+        "category": "Standard",
         "effective_date": "January 15, 2024",
         "termination_date": "November 8, 2025",
         "indemnification": "standard",
@@ -157,6 +186,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "Upsilon Tech",
         "vendor_id": 32,
+        "spend": 32000000,
+        "category": "Major",
         "effective_date": "February 1, 2024",
         "termination_date": "October 15, 2025",
         "indemnification": "enhanced",
@@ -166,6 +197,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "Cosmos Industries",
         "vendor_id": 41,
+        "spend": 800000,
+        "category": "Low-Value",
         "effective_date": "March 1, 2024",
         "termination_date": "October 2, 2025",
         "indemnification": "standard",
@@ -175,6 +208,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "Orion Manufacturing",
         "vendor_id": 45,
+        "spend": 20000000,
+        "category": "Standard",
         "effective_date": "April 1, 2024",
         "termination_date": "November 12, 2025",
         "indemnification": "missing",
@@ -184,6 +219,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "Titan Corporation",
         "vendor_id": 49,
+        "spend": 55000000,
+        "category": "Major",
         "effective_date": "May 1, 2024",
         "termination_date": "October 20, 2025",
         "indemnification": "standard",
@@ -193,6 +230,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "Stellar Systems",
         "vendor_id": 37,
+        "spend": 1500000,
+        "category": "Low-Value",
         "effective_date": "June 1, 2024",
         "termination_date": "August 12, 2025",
         "indemnification": "risky",
@@ -202,6 +241,8 @@ CONTRACT_CONFIGS = [
     {
         "vendor_name": "Phoenix Solutions",
         "vendor_id": 48,
+        "spend": 42000000,
+        "category": "Major",
         "effective_date": "July 1, 2024",
         "termination_date": "September 8, 2025",
         "indemnification": "standard",
@@ -494,34 +535,62 @@ def create_contract_pdf(config: dict, output_dir: Path) -> str:
 def main():
     """Generate all contract PDFs."""
     script_dir = Path(__file__).parent
-    output_dir = script_dir.parent / "data" / "contracts"
-    output_dir.mkdir(parents=True, exist_ok=True)
+    contracts_dir = script_dir.parent / "data" / "contracts"
+    structured_dir = script_dir.parent / "data" / "structured"
+
+    contracts_dir.mkdir(parents=True, exist_ok=True)
+    structured_dir.mkdir(parents=True, exist_ok=True)
+
+    csv_path = structured_dir / "vendor_spend.csv"
 
     print(f"Generating {len(CONTRACT_CONFIGS)} contract PDFs...")
-    print(f"Output directory: {output_dir}")
     print("-" * 50)
 
-    for config in CONTRACT_CONFIGS:
-        filename = create_contract_pdf(config, output_dir)
-        trap_indicator = " [TRAP - EXPIRED CONTRACT]" if config["is_trap"] else ""
-        risk_indicators = []
-        if config["indemnification"] in ["missing", "risky"]:
-            risk_indicators.append(f"Indemnification: {config['indemnification']}")
-        if config["warranty"] in ["missing", "limited"]:
-            risk_indicators.append(f"Warranty: {config['warranty']}")
+    csv_rows = []
+    try:
+        for config in CONTRACT_CONFIGS:
+            # 1. Create PDF
+            filename = create_contract_pdf(config, contracts_dir)
 
-        risk_str = f" [RISKS: {', '.join(risk_indicators)}]" if risk_indicators else ""
-        print(f"  Created: {filename}{trap_indicator}{risk_str}")
+            # 2. Add to CSV list
+            csv_rows.append({
+                "vendor_id": config["vendor_id"],
+                "vendor_name": config["vendor_name"],
+                "total_spend_ytd": config["spend"],
+                "contract_filename": filename,
+                "renewal_date": config["db_renewal"],
+                "status": "Active",
+                "category": config["category"]
+            })
 
-    print("-" * 50)
-    print(f"Successfully generated {len(CONTRACT_CONFIGS)} contracts.")
-    print("\nKey documents for demo:")
-    print("  - High-value vendors (>$100M): Premier Logistics, Precision Manufacturing,")
-    print("    Alpha Systems, Zeta Corporation, Quantum Dynamics, Apex Logistics")
-    print("  - TRAP document: Apex_Logistics_MSA.pdf (expired Dec 31, 2024)")
-    print("  - Missing indemnification: Alpha Systems, CloudNine, Orion")
-    print("  - Risky indemnification: Quantum Dynamics, Kappa Industries, Stellar")
+            trap_indicator = " [TRAP - EXPIRED CONTRACT]" if config["is_trap"] else ""
+            risk_indicators = []
+            if config["indemnification"] in ["missing", "risky"]:
+                risk_indicators.append(f"Indemnification: {config['indemnification']}")
+            if config["warranty"] in ["missing", "limited"]:
+                risk_indicators.append(f"Warranty: {config['warranty']}")
 
+            risk_str = f" [RISKS: {', '.join(risk_indicators)}]" if risk_indicators else ""
+            print(f"  Created: {filename}{trap_indicator}{risk_str}")
+
+        # 3. Write CSV
+        with open(csv_path, 'w', newline='') as f:
+            fieldnames = ["vendor_id", "vendor_name", "total_spend_ytd", "contract_filename", "renewal_date", "status", "category"]
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(csv_rows)
+
+        print("-" * 50)
+        print(f"Successfully generated {len(CONTRACT_CONFIGS)} contracts.")
+        print("\nKey documents for demo:")
+        print("  - High-value vendors (>$100M): Premier Logistics, Precision Manufacturing,")
+        print("    Alpha Systems, Zeta Corporation, Quantum Dynamics, Apex Logistics")
+        print("  - TRAP document: Apex_Logistics_MSA.pdf (expired Dec 31, 2024)")
+        print("  - Missing indemnification: Alpha Systems, CloudNine, Orion")
+        print("  - Risky indemnification: Quantum Dynamics, Kappa Industries, Stellar")
+    
+    except Exception as e:
+        print(f"❌ Generation Error: {e}")
 
 if __name__ == "__main__":
     main()
