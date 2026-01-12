@@ -79,7 +79,12 @@ This demonstrates real-world scenarios where:
 ### Four Simple Steps to Success
 
 ```bash
-# 1️⃣ Install dependencies
+# 1️⃣ Install dependencies & Activate Tooling
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
+source ~/.bashrc  # Refresh shell to recognize 'uv'
+
+# Setup virtual env and add dependencies
 uv sync
 
 # 2️⃣ Setup infrastructure (generates PDFs, creates BigQuery + Vertex AI Search, ~5-10 mins)

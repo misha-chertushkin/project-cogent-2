@@ -74,9 +74,10 @@ setup-gcs:
 	@echo "GCS setup complete. Bucket: gs://$(GCS_BUCKET)"
 
 setup-bq:
-	@echo "Setting up BigQuery dataset: $(DATASET_ID)..."
-	uv run python scripts/setup_bigquery.py --project_id $(PROJECT_ID) --dataset_id $(DATASET_ID) --table_id $(TABLE_ID) --region $(REGION)
-	@echo "BigQuery setup complete. Dataset: $(PROJECT_ID).$(DATASET_ID).$(TABLE_ID)"
+	@echo "🚀 Setting up BigQuery..."
+	@# Ensure PATH includes uv
+	@export PATH="$$HOME/.local/bin:$$PATH" && \
+	uv run python scripts/setup_bigquery.py --project_id $(PROJECT_ID)
 
 setup-vais:
 	@echo "Setting up Vertex AI Search datastore: $(DATA_STORE_ID)..."
@@ -118,11 +119,13 @@ demo-e2e: check-env enable-apis sync-deps install-deps dvc-pull d365-upload d365
 	@echo "=============================================="
 
 dvc-pull:
-	@echo "📦 Pulling data from DVC remote storage..."
+	@echo "📦 Pulling data from DVC..."
 	@cd .. && uv run dvc pull
-	@echo "DVC pull complete."
-	@echo "  - PDFs downloaded to: data/contracts_to_upload/"
-	@echo "  - CSV downloaded to: data/structured_to_upload/vendor_spend.csv"
+	@# Move files to the names the scripts expect immediately after pull
+	@mkdir -p data/structured data/contracts
+	@cp data/structured_to_upload/vendor_spend.csv data/structured/
+	@cp -r data/contracts_to_upload/* data/contracts/
+	@echo "✅ Data moved to standard paths for hydration scripts."
 
 d365-upload:
 	@echo "⬆️  Uploading contracts and data to Dynamics 365..."

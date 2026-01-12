@@ -1,28 +1,29 @@
 {
-  "project_id": "asp-test-dev",
+  "project_id": "${PROJECT_ID}",
+  "project_number": "${PROJECT_NUMBER}",
   "region": "us",
   "created_at": "2025-12-16T22:05:18.890871",
   "bigquery": {
     "dataset_id": "vendor_spend_dataset",
     "table_id": "vendor_spend",
-    "full_table_id": "asp-test-dev.vendor_spend_dataset.vendor_spend",
+    "full_table_id": "${PROJECT_ID}.vendor_spend_dataset.vendor_spend",
     "location": "us-central1",
     "created": "2025-12-16T20:40:13.535000+00:00",
     "row_count": 50,
     "schema_fields": 7
   },
   "gcs": {
-    "bucket_name": "asp-test-dev-vendor-analysis-contracts",
+    "bucket_name": "${PROJECT_ID}-vendor-analysis-contracts",
     "contracts_path": "contracts/",
-    "bucket_uri": "gs://asp-test-dev-vendor-analysis-contracts"
+    "bucket_uri": "gs://${PROJECT_ID}-vendor-analysis-contracts"
   },
   "vertex_ai_search": {
     "datastore_id": "vendor-analysis-datastore",
-    "datastore_name": "projects/901701644605/locations/us/collections/default_collection/dataStores/vendor-analysis-datastore",
+    "datastore_name": "projects/${PROJECT_NUMBER}/locations/us/collections/default_collection/dataStores/vendor-analysis-datastore",
     "display_name": "vendor-analysis-datastore",
     "region": "us",
     "collection": "default_collection",
-    "full_resource_name": "projects/901701644605/locations/us/collections/default_collection/dataStores/vendor-analysis-datastore",
-    "serving_config": "projects/asp-test-dev/locations/us/collections/default_collection/engines/vendor-analysis-datastore-search/servingConfigs/default_config"
+    "full_resource_name": "projects/${PROJECT_NUMBER}/locations/us/collections/default_collection/dataStores/vendor-analysis-datastore",
+    "serving_config": "projects/${PROJECT_ID}/locations/us/collections/default_collection/engines/vendor-analysis-datastore-search/servingConfigs/default_config"
   }
 }

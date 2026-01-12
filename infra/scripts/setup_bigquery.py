@@ -69,10 +69,13 @@ def load_csv_to_table(
 
     # Load CSV data
     job_config = bigquery.LoadJobConfig(
-        schema=schema,
-        skip_leading_rows=1,  # Skip header row
-        source_format=bigquery.SourceFormat.CSV,
-        write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
+    schema=schema,
+    skip_leading_rows=1,
+    source_format=bigquery.SourceFormat.CSV,
+    write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
+    allow_quoted_newlines=True,
+    # This is the magic line for 2026:
+    autodetect=False,
     )
 
     with open(csv_path, "rb") as source_file:
