@@ -9,11 +9,35 @@ imports PDF contracts from GCS for the hybrid search demo.
 import argparse
 import sys
 import time
+import json
+from pathlib import Path
 from typing import Optional
 
 from google.api_core.client_options import ClientOptions
 from google.cloud import discoveryengine_v1 as discoveryengine
+from google.cloud import resourcemanager_v3
 
+def get_project_number(project_id: str) -> str:
+    """Fetch the project number for the given project ID."""
+    client = resourcemanager_v3.ProjectsClient()
+    project = client.get_project(name=f"projects/{project_id}")
+    # The name format is projects/123456789, we split to get '123456789'
+    return project.name.split("/")[-1]
+
+def update_metadata_file(project_id: str, project_number: str, data_store_id: str):
+    """Update the metadata JSON with current project ID and Number."""
+    metadata_path = Path(__file__).parent.parent / "infrastructure_metadata.json"
+    
+    with open(metadata_path, 'r') as f:
+        content = f.read()
+
+    # Replace all placeholders with actual values
+    content = content.replace("${PROJECT_ID}", project_id)
+    content = content.replace("${PROJECT_NUMBER}", project_number)
+    
+    with open(metadata_path, 'w') as f:
+        f.write(content)
+    print(f"✅ Metadata file synchronized for Project: {project_id} (# {project_number})")
 
 def create_data_store(
     project_id: str,
@@ -59,6 +83,10 @@ def create_data_store(
     print("Waiting for data store creation...")
     response = operation.result(timeout=90)
     print(f"Created data store: {response.name}")
+
+    print("🕒 Sleeping for 60s to allow global propagation (2026 Consistency Check)...")
+    time.sleep(60)
+    
     return response.name
 
 
@@ -197,14 +225,20 @@ def main():
     args = parser.parse_args()
 
     try:
-        # Create data store
-        data_store_name = create_data_store(
-            args.project_id,
-            args.data_store_id,
-            args.region,
-        )
+        # 1. Fetch the numeric Project Number (Critical for resource paths)
+        print(f"🔍 Fetching project number for {args.project_id}...")
+        project_number = get_project_number(
+            args.project_id
+            )
 
-        # Import documents
+        # 2. Create data store
+        data_store_name = create_data_store(
+            args.project_id, 
+            args.data_store_id, 
+            args.region
+            )
+
+        # 3. Import documents
         import_documents(
             args.project_id,
             args.data_store_id,
@@ -212,16 +246,31 @@ def main():
             args.region,
         )
 
-        # Create search engine (optional)
+        update_metadata_file(
+            args.project_id, 
+            args.data_store_id
+            )
+        print("\n✅ Vertex AI Search setup and Metadata Sync complete!")
+
+        # 4. Create search engine (optional)
         create_search_engine(
             args.project_id,
             args.data_store_id,
             args.region,
         )
 
+        # 5. SYNC METADATA - Replaces project ID and NUMBER in JSON
+        update_metadata_file(
+            args.project_id, 
+            project_number, 
+            args.data_store_id
+            )
+
         print("\n" + "=" * 50)
         print("Vertex AI Search setup complete!")
         print("=" * 50)
+        print(f"Project ID:    {args.project_id}")
+        print(f"Project Num:   {project_number}")
         print(f"Data Store ID: {args.data_store_id}")
         print(f"Region:        {args.region}")
         print(f"GCS Source:    gs://{args.gcs_bucket}/contracts/")
