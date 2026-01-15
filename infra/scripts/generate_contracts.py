@@ -12,6 +12,19 @@ import csv
 from datetime import datetime
 from pathlib import Path
 
+
+def parse_date_to_iso(date_str: str) -> str:
+    """Convert human-readable date to ISO format for BigQuery compatibility.
+
+    Args:
+        date_str: Date in format like "December 1, 2025"
+
+    Returns:
+        Date in ISO format "2025-12-01"
+    """
+    dt = datetime.strptime(date_str, "%B %d, %Y")
+    return dt.strftime("%Y-%m-%d")
+
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
@@ -552,13 +565,13 @@ def main():
             # 1. Create PDF
             filename = create_contract_pdf(config, contracts_dir)
 
-            # 2. Add to CSV list
+            # 2. Add to CSV list (convert date to ISO format for BigQuery)
             csv_rows.append({
                 "vendor_id": config["vendor_id"],
                 "vendor_name": config["vendor_name"],
                 "total_spend_ytd": config["spend"],
                 "contract_filename": filename,
-                "renewal_date": config["db_renewal"],
+                "renewal_date": parse_date_to_iso(config["termination_date"]),
                 "status": "Active",
                 "category": config["category"]
             })

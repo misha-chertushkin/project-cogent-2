@@ -84,22 +84,6 @@ setup-vais:
 	uv run python scripts/setup_vertex_ai_search.py --project_id $(PROJECT_ID) --data_store_id $(DATA_STORE_ID) --gcs_bucket $(GCS_BUCKET) --region $(DATA_STORE_REGION)
 	@echo "Vertex AI Search setup complete. Data Store ID: $(DATA_STORE_ID)"
 
-infra: install-deps setup-gcs setup-bq setup-vais
-	@echo ""
-	@echo "=============================================="
-	@echo "Infrastructure setup complete!"
-	@echo "=============================================="
-	@echo "Project ID:       $(PROJECT_ID)"
-	@echo "Region:           $(REGION)"
-	@echo "GCS Bucket:       gs://$(GCS_BUCKET)"
-	@echo "BigQuery Dataset: $(PROJECT_ID).$(DATASET_ID).$(TABLE_ID)"
-	@echo "VAIS Data Store:  $(DATA_STORE_ID)"
-	@echo ""
-	@echo "Next steps:"
-	@echo "1. Configure your ADK agent with these resource IDs"
-	@echo "2. Run 'make test' from the project root to test the agent"
-	@echo "=============================================="
-
 # --- End-to-End Demo Workflow ---
 demo-e2e: check-env enable-apis sync-deps install-deps dvc-pull d365-upload d365-download setup-gcs setup-bq setup-vais
 	@echo ""

@@ -246,12 +246,6 @@ def main():
             args.region,
         )
 
-        update_metadata_file(
-            args.project_id, 
-            args.data_store_id
-            )
-        print("\n✅ Vertex AI Search setup and Metadata Sync complete!")
-
         # 4. Create search engine (optional)
         create_search_engine(
             args.project_id,

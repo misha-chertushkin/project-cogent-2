@@ -71,65 +71,59 @@ This demonstrates real-world scenarios where:
 
 ## 🚀 Quick Start
 
-**Prerequisites**: Google Cloud Project with billing enabled, `gcloud` CLI authenticated (`gcloud auth login`), Python 3.10+ with `uv`
+**Prerequisites**: Google Cloud Project with billing enabled, `gcloud` CLI authenticated (`gcloud auth login`), Python 3.10+
 
-### Two Demo Modes
-
-### Option 1: Standard Demo (Synthetic Data)
-### Four Simple Steps to Success
+### Streamlined Setup (Recommended)
 
 ```bash
-# 1️⃣ Install dependencies & Activate Tooling
-curl -LsSf https://astral.sh/uv/install.sh | sh
-export PATH="$HOME/.local/bin:$PATH"
-source ~/.bashrc  # Refresh shell to recognize 'uv'
+# 1. Configure your Google Cloud project
+gcloud config set project <your-project-id>
+gcloud auth application-default set-quota-project <your-project-id>
 
-# Setup virtual env and add dependencies
-uv sync
+# 2. Install dependencies
+make install
 
-# 2️⃣ Setup infrastructure (generates PDFs, creates BigQuery + Vertex AI Search, ~5-10 mins)
-gcloud config set project YOUR-PROJECT-ID
-cd infra
+# 3. Setup infrastructure (~5-10 mins)
 make infra
 
-# 3️⃣ Launch the Agent
-uv run adk run app
+# 4. Launch the agent playground
+make playground
+```
 
-# 4️⃣ Run the Demo
-# Use the "Golden Queries" from PROMPTS.md to trigger the Apex Trap.
+Use the "Golden Queries" from [PROMPTS.md](./PROMPTS.md) to trigger the Apex Trap.
 
-#### Option 2: End-to-End Demo (with Dynamics 365)
+### Option 2: End-to-End Demo (with Dynamics 365)
 
 Use this to demonstrate the complete data journey from Dynamics 365 → GCP → Agent.
 
 ```bash
-# 1️⃣ Configure Dynamics 365 credentials
+# 1. Configure your Google Cloud project
+gcloud config set project <your-project-id>
+gcloud auth application-default set-quota-project <your-project-id>
+
+# 2. Configure Dynamics 365 credentials
 cd infra
 cp .env.example .env
 # Edit .env with your D365 credentials
+cd ..
 
-# 2️⃣ Run end-to-end infrastructure setup (handles all dependencies automatically)
-gcloud config set project YOUR-PROJECT-ID
+# 3. Run end-to-end demo (handles all dependencies automatically)
 make demo-e2e
 
-# This will:
-# - Install all project dependencies (including DVC)
-# - Pull contract PDFs and CSV from DVC remote storage
-# - Upload data to Dynamics 365 CRM
-# - PAUSE for you to demo the D365 UI (press Enter to continue)
-# - Download data back from Dynamics 365
-# - Create BigQuery dataset and load vendor data
-# - Create Vertex AI Search datastore and index contracts
-# - Setup complete GCP infrastructure
-
-# 3️⃣ Run the agent
-cd ..
-uv run adk run app
+# 4. Launch the agent playground
+make playground
 ```
 
-**That's it!** The agent will analyze vendors and detect the contract expiration trap.
+The `demo-e2e` target will:
+- Install all project dependencies (including DVC)
+- Pull contract PDFs and CSV from DVC remote storage
+- Upload data to Dynamics 365 CRM
+- PAUSE for you to demo the D365 UI (press Enter to continue)
+- Download data back from Dynamics 365
+- Create BigQuery dataset and load vendor data
+- Create Vertex AI Search datastore and index contracts
 
-🕹️ Pro-Tip: Open PROMPTS.md for a copy-paste list of high-impact queries to use during your live demo.
+**That's it!** The agent will analyze vendors and detect the contract expiration trap.
 
 > **Note**: Both workflows automatically detect your project from `gcloud config`. You can also set `PROJECT_ID` environment variable to override.
 
