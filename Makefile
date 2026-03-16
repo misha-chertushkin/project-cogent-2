@@ -66,7 +66,8 @@ demo-e2e:
 # --- Launch Agent Playground ---
 playground:
 	@echo "Launching ADK Agent Playground..."
-	uv run adk web app
+	uv run adk web . --port 8501 --reload_agents
+
 
 # --- Clean Generated Files ---
 clean:
